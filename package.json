@@ -1,0 +1,25 @@
+{
+  "name": "biblibra",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "schema": "apollo schema:download --endpoint http://localhost:8080/v1/graphql"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.3.6",
+    "@vue/apollo-composable": "^4.0.0-alpha.12",
+    "graphql": "^15.4.0",
+    "graphql-tag": "^2.11.0",
+    "subscriptions-transport-ws": "^0.9.18",
+    "vue": "^3.0.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss7-compat": "^2.0.2",
+    "@vue/compiler-sfc": "^3.0.4",
+    "autoprefixer": "^9.8.6",
+    "postcss": "^7.0.35",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.2",
+    "vite": "^1.0.0-rc.13"
+  }
+}
