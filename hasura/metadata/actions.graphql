@@ -1,0 +1,18 @@
+type Mutation {
+  getBookData (
+    isbn: String!
+  ): BookDataOutput
+}
+
+
+
+
+type BookDataOutput {
+  title : String!
+  language : String!
+  pages : Int!
+  classification : String!
+  year : Int!
+  isbn : String!
+}
+

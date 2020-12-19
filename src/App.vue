@@ -6,7 +6,12 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div class="p-2 bg-gray-50 h-screen w-screen">
+  <div class="p-2 pb-4 bg-gray-50 w-screen">
     <router-view></router-view>
   </div>
 </template>
+<style scoped>
+div {
+  min-height: 100vh;
+}
+</style>

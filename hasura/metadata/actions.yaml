@@ -1,0 +1,11 @@
+actions:
+- name: getBookData
+  definition:
+    kind: synchronous
+    handler: http://api:80/getBookData
+custom_types:
+  enums: []
+  input_objects: []
+  objects:
+  - name: BookDataOutput
+  scalars: []
