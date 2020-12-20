@@ -1,3 +1,48 @@
 - table:
     schema: public
     name: books
+  insert_permissions:
+  - role: anonymous
+    permission:
+      check: {}
+      columns:
+      - cover_image
+      - pages
+      - year
+      - id
+      - classification
+      - isbn
+      - language
+      - title
+      backend_only: false
+  select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - cover_image
+      - pages
+      - year
+      - id
+      - classification
+      - isbn
+      - language
+      - title
+      filter: {}
+  update_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - cover_image
+      - pages
+      - year
+      - id
+      - classification
+      - isbn
+      - language
+      - title
+      filter: {}
+      check: null
+  delete_permissions:
+  - role: anonymous
+    permission:
+      filter: {}

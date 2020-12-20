@@ -3,6 +3,8 @@ actions:
   definition:
     kind: synchronous
     handler: http://api:80/getBookData
+  permissions:
+  - role: anonymous
 custom_types:
   enums: []
   input_objects: []

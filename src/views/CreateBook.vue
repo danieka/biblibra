@@ -1,15 +1,17 @@
 <script lang="ts">
-import { useMutation } from "@vue/apollo-composable";
-import { defineComponent } from "vue";
+import { useMutation, useQuery } from "@vue/apollo-composable";
+import { defineComponent, watch } from "vue";
 import {
   addBookMutation,
+  allBookISBN,
   allBooks,
   getBookDataMutation,
 } from "../graphql/books";
 import Quagga from "quagga";
-import { countBy, identity, chain, pickBy } from "lodash";
+import { countBy, identity, chain, pickBy, find } from "lodash";
 
 import schema from "../../schema.json";
+import { error } from "../components/Toast.vue";
 
 const fields = schema.__schema.types
   .find((t) => t.name === "books")
@@ -33,17 +35,31 @@ export default defineComponent({
     }));
 
     const { mutate: getBookData } = useMutation(getBookDataMutation);
+
+    const { result } = useQuery(allBookISBN);
+
     return {
+      error,
       fields,
       humanize,
       addBook,
       getBookData,
+      result,
     };
   },
   data: () => ({
     data: {},
     scanning: false,
   }),
+  computed: {
+    isbnDuplicate(): boolean {
+      if (!this.result) {
+        return;
+      }
+      console.error(this.result.books, this.data.isbn);
+      return find(this.result.books, (book) => book.isbn === this.data.isbn);
+    },
+  },
   watch: {
     scanning() {
       if (!this.scanning) {
@@ -72,7 +88,7 @@ export default defineComponent({
 
             const codes = [];
 
-            Quagga.onDetected((data) => {
+            const detectedHandler = (data) => {
               const isbn = data.codeResult.code;
               codes.push(isbn);
               if (codes.length > 10) {
@@ -86,6 +102,7 @@ export default defineComponent({
                     .value()[0][0]
                 );
 
+                Quagga.offDetected(detectedHandler);
                 Quagga.stop();
                 this.scanning = false;
                 this.onISBNChange(
@@ -96,7 +113,9 @@ export default defineComponent({
                     .value()[0][0]
                 );
               }
-            });
+            };
+
+            Quagga.onDetected(detectedHandler);
           }
         )
       );
@@ -118,9 +137,13 @@ export default defineComponent({
       this.$router.back();
     },
     async onISBNChange(isbn: string) {
-      const res = await this.getBookData({ isbn });
-      console.log("got result", res);
-      Object.assign(this.data, res.data.getBookData);
+      try {
+        const res = await this.getBookData({ isbn });
+        Object.assign(this.data, res.data.getBookData);
+      } catch (e) {
+        console.error(e);
+        this.error = "Could not find ISBN";
+      }
     },
   },
 });
@@ -152,8 +175,12 @@ export default defineComponent({
           @blur="onISBNChange(data.isbn)"
         />
       </div>
+
       <ion-icon name="camera" size="large" @click="scanning = true"></ion-icon>
     </div>
+    <p v-if="isbnDuplicate" class="mt- text-red-500">
+      ISBN has already been added to library
+    </p>
     <div
       v-for="(field, key) in fields"
       :key="key"
@@ -179,7 +206,8 @@ export default defineComponent({
         Cancel
       </button>
       <button
-        class="button text-white bg-green-600 hover:bg-green-700"
+        class="button text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
+        :disabled="isbnDuplicate"
         @click="create"
       >
         Create

@@ -11,6 +11,14 @@ export const allBooks = gql`
   }
 `;
 
+export const allBookISBN = gql`
+  query AllBooks {
+    books {
+      isbn
+    }
+  }
+`;
+
 export const addBookMutation = gql`
   mutation addBook($object: books_insert_input!) {
     insert_books_one(object: $object) {
