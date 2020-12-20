@@ -7,14 +7,14 @@ import { getMainDefinition } from "@apollo/client/utilities";
 
 const wsLink = new WebSocketLink({
   // subscriptions-transport-ws package needs to be installed also
-  uri: "ws://localhost:8080/v1/graphql",
+  uri: `ws://${window.location.hostname}:8080/v1/graphql`,
   options: {
     reconnect: true,
   },
 });
 
 const httpLink = new HttpLink({
-  uri: "http://localhost:8080/v1/graphql",
+  uri: `http://${window.location.hostname}:8080/v1/graphql`,
 });
 
 const link = split(

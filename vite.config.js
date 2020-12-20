@@ -12,6 +12,6 @@ export default {
   },
   rollupInputOptions: {
     // ignore react stuff
-    external: ["react"],
+    external: ["react", "@vue/composition-api"],
   },
 };

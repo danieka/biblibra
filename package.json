@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "schema": "apollo schema:download --endpoint http://localhost:8080/v1/graphql"
+    "schema": "apollo schema:download --endpoint http://localhost:8080/v1/graphql",
+    "postinstall": "node scripts/patch-apollo.js"
   },
   "dependencies": {
     "@apollo/client": "^3.3.6",
@@ -18,6 +19,8 @@
     "quagga": "^0.12.1",
     "subscriptions-transport-ws": "^0.9.18",
     "vue": "^3.0.4",
+    "vue-apollo": "^3.0.4",
+    "vue-demi": "^0.5.0",
     "vue-router": "^4.0.1"
   },
   "devDependencies": {
