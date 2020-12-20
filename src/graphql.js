@@ -5,17 +5,29 @@ import { setContext } from "@apollo/client/link/context";
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { getMainDefinition } from "@apollo/client/utilities";
 
+let newURI;
+if (window.location.protocol === "https:") {
+  newURI = "wss:";
+} else {
+  newURI = "ws:";
+}
+
 const wsLink = new WebSocketLink({
   // subscriptions-transport-ws package needs to be installed also
-  uri: `ws://${window.location.hostname}:8080/v1/graphql`,
+  uri: `${newURI}//${window.location.hostname}:8080/v1/graphql`,
   options: {
     reconnect: true,
   },
 });
 
 const httpLink = new HttpLink({
-  uri: `http://${window.location.hostname}:8080/v1/graphql`,
+  uri: `${window.location.protocol}//${window.location.hostname}:8080/v1/graphql`,
 });
+
+console.error(
+  `${window.location.protocol}//${window.location.hostname}:8080/v1/graphql`,
+  httpLink
+);
 
 const link = split(
   // split based on operation type
