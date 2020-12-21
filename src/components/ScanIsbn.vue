@@ -36,7 +36,7 @@ export default defineComponent({
           detectedHandler = (data: { codeResult: { code: string } }) => {
             const isbn = data.codeResult.code;
             codes.push(isbn);
-            if (codes.length > 10) {
+            if (codes.length > 20) {
               console.log(
                 "Found code",
                 codes.length,
