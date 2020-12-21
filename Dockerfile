@@ -29,6 +29,10 @@ EXPOSE 80
 WORKDIR /app
 COPY ./hasura/ /app
 COPY ./docker-entrypoint.sh /app
+
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d
+
 RUN chmod +x /app/docker-entrypoint.sh
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
