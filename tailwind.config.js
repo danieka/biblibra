@@ -5,6 +5,8 @@ module.exports = {
   variants: {
     extend: {
       opacity: ["disabled"],
+      borderWidth: ["last"],
+      borderRadius: ["last", "first"],
     },
   },
   plugins: [],

@@ -11,6 +11,21 @@ export const allBooks = gql`
   }
 `;
 
+export const bookByPk = gql`
+  query bookByPx($id: bigint!) {
+    books_by_pk(id: $id) {
+      classification
+      cover_image
+      id
+      isbn
+      language
+      pages
+      title
+      year
+    }
+  }
+`;
+
 export const allBookISBN = gql`
   query AllBooks {
     books {
