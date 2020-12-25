@@ -54,7 +54,7 @@ export default defineComponent({
 <template>
     <app-bar>Create book</app-bar>
     <div class="p-2">
-        <book-form v-model="data" v-model:valid="valid" ref="bookForm"></book-form>
+        <book-form v-model:model-value="data" v-model:valid="valid" ref="bookForm"></book-form>
         <div class="flex flex-row justify-center space-x-6 mt-4">
             <button class="button bg-gray-100 hover:bg-gray-200" @click="cancel">Cancel</button>
             <button

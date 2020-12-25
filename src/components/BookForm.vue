@@ -8,11 +8,12 @@ import { assert, findModel } from '../graphql/utils'
 import { error } from '../components/Toast.vue'
 import ScanIsbn from './ScanIsbn.vue'
 import { cloneDeep } from '@apollo/client/utilities'
+import Loader from './Loader.vue'
 
 const fields = findModel('books').fields.filter(f => !['id', 'isbn', 'cover_image'].includes(f.name))
 
 export default defineComponent({
-    components: { ScanIsbn },
+    components: { ScanIsbn, Loader },
     name: 'BookForm',
     emits: ['update:modelValue', 'update:valid'],
     props: {
@@ -34,7 +35,7 @@ export default defineComponent({
 
         const { result } = useQuery(allBookISBN)
         const humanize = (s: string) => s.replace('_', ' ')
-        const { mutate: getBookData } = useMutation(getBookDataMutation)
+        const { mutate: getBookData, loading } = useMutation(getBookDataMutation)
 
         return {
             result,
@@ -42,11 +43,12 @@ export default defineComponent({
             humanize,
             error,
             getBookData,
+            loading,
         }
     },
     data: () => ({
         scanning: false,
-        data: {} as Record<string, unknown>,
+        data: {} as Readonly<Record<string, unknown>>,
     }),
     computed: {
         isbnDuplicate(): boolean {
@@ -91,7 +93,7 @@ export default defineComponent({
             }
             try {
                 const res = await this.getBookData({ isbn })
-                Object.assign(this.data, res.data.getBookData)
+                this.data = { ...this.data, ...res.data.getBookData }
             } catch (e) {
                 console.error(e)
                 this.error = 'Could not find ISBN'
@@ -101,6 +103,7 @@ export default defineComponent({
 })
 </script>
 <template>
+    <loader v-if="loading"></loader>
     <template v-if="scanning">
         <scan-isbn @isbn="onISBNChange($event)" @cancel="scanning = false"></scan-isbn>
     </template>
@@ -114,7 +117,7 @@ export default defineComponent({
                     for="isbn"
                     :readonly="readonly"
                     @input="set(field.name, $event)"
-                    @blur="onISBNChange(data.isbn)"
+                    @blur="onISBNChange($event.target.value)"
                 />
             </div>
 
