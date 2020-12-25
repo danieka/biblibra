@@ -4,17 +4,19 @@ import { find } from "lodash";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import { allBookISBN, getBookDataMutation } from "../graphql/books";
 import schema from "../../schema.json";
-import { findModel } from "../graphql/utils";
+import { assert, findModel } from "../graphql/utils";
 import { error } from "../components/Toast.vue";
 import ScanIsbn from "./ScanIsbn.vue";
+import { cloneDeep } from "@apollo/client/utilities";
 
 const fields = findModel("books").fields.filter(
-  (f) => !["id", "isbn"].includes(f.name)
+  (f) => !["id", "isbn", "cover_image"].includes(f.name)
 );
 
 export default defineComponent({
   components: { ScanIsbn },
   name: "BookForm",
+  emits: ["update:modelValue", "update:valid"],
   props: {
     modelValue: {
       type: Object,
@@ -32,21 +34,11 @@ export default defineComponent({
   setup(props) {
     const internalInstance = getCurrentInstance();
 
-    const data = computed({
-      get(): Record<string, unknown> {
-        return props.modelValue;
-      },
-      set(data: Record<string, unknown>) {
-        internalInstance!.emit("update:modelValue", data);
-      },
-    });
-
     const { result } = useQuery(allBookISBN);
     const humanize = (s: string) => s.replace("_", " ");
     const { mutate: getBookData } = useMutation(getBookDataMutation);
 
     return {
-      data,
       result,
       fields,
       humanize,
@@ -56,10 +48,15 @@ export default defineComponent({
   },
   data: () => ({
     scanning: false,
+    data: {} as Record<string, unknown>,
   }),
   computed: {
     isbnDuplicate(): boolean {
-      if (!this.result || !this.data) {
+      if (
+        !this.result ||
+        !this.data ||
+        this.data.isbn === this.modelValue.isbn
+      ) {
         return false;
       }
       return find(this.result.books, (book) => book.isbn === this.data.isbn);
@@ -72,8 +69,27 @@ export default defineComponent({
     isbnDuplicate() {
       this.$emit("update:valid", !this.isbnDuplicate);
     },
+    modelValue: {
+      immediate: true,
+      handler() {
+        this.data = cloneDeep(this.modelValue);
+      },
+    },
+    data() {
+      this.$emit("update:modelValue", this.data);
+    },
   },
   methods: {
+    set(field: string, value: InputEvent) {
+      assert(!!value.target);
+      const target = value.target as HTMLInputElement;
+      const diff: Record<string, unknown> = {};
+      diff[field] = target.value;
+      this.data = { ...this.data, ...diff };
+    },
+    cancel() {
+      this.data = cloneDeep(this.modelValue);
+    },
     async onISBNChange(isbn: string) {
       if (this.readonly) {
         return;
@@ -106,16 +122,17 @@ export default defineComponent({
       >
         <label id="isbn">ISBN</label>
         <input
-          v-model="data['isbn']"
+          :value="data['isbn']"
           type="number"
           for="isbn"
           :readonly="readonly"
+          @input="set(field.name, $event)"
           @blur="onISBNChange(data.isbn)"
         />
       </div>
 
       <ion-icon
-        v-if="!readonly && hasScanningCapability"
+        v-if="!readonly && hasScanningCapability && !data.id"
         name="camera"
         size="large"
         class="mr-2"
@@ -140,19 +157,21 @@ export default defineComponent({
       >
         <label :id="field.name">{{ humanize(field.name) }}</label>
         <input
-          v-model="data[field.name]"
+          :value="data[field.name]"
           type="number"
           :for="field.name"
           :readonly="readonly"
+          @input="set(field.name, $event)"
         />
       </template>
       <template v-else>
         <label :id="field.name">{{ humanize(field.name) }}</label>
         <input
-          v-model="data[field.name]"
+          :value="data[field.name]"
           type="text"
           :for="field.name"
           :readonly="readonly"
+          @input="set(field.name, $event)"
         />
       </template>
     </div>

@@ -11,14 +11,7 @@ export default defineComponent({
 </script>
 <template>
   <div class="w-screen min-height bg-gray-100">
-    <div class="bg-pink-900 p-2">
-      <h1 class="text-center text-white font-bold">
-        {{ $route.meta.title }}
-      </h1>
-    </div>
-    <div class="p-2 pb-4">
-      <router-view></router-view>
-    </div>
+    <router-view></router-view>
     <toast></toast>
   </div>
 </template>

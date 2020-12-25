@@ -4,16 +4,14 @@ import ViewBook from "./views/ViewBook.vue";
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 
 export let routes: RouteRecordRaw[] = [
-  { path: "/", component: Home, meta: { title: "Home" } },
+  { path: "/", component: Home },
   {
     path: "/books/create",
     component: CreateBook,
-    meta: { title: "Create Book" },
   },
   {
     path: "/books/:id",
     component: ViewBook,
-    meta: { title: "Book" },
     props: (route) => ({ id: parseInt(route.params.id as string) }),
   },
 ];
