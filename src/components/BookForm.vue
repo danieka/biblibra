@@ -9,11 +9,12 @@ import { error } from '../components/Toast.vue'
 import ScanIsbn from './ScanIsbn.vue'
 import { cloneDeep } from '@apollo/client/utilities'
 import Loader from './Loader.vue'
+import { form } from './Form'
 
 const fields = findModel('books').fields.filter(f => !['id', 'isbn', 'cover_image'].includes(f.name))
 
 export default defineComponent({
-    components: { ScanIsbn, Loader },
+    components: { ScanIsbn, Loader, GeneratedForm: form(fields) },
     name: 'BookForm',
     emits: ['update:modelValue', 'update:valid'],
     props: {
@@ -71,9 +72,6 @@ export default defineComponent({
                 this.data = cloneDeep(this.modelValue)
             },
         },
-        data() {
-            this.$emit('update:modelValue', this.data)
-        },
     },
     methods: {
         set(field: string, value: InputEvent) {
@@ -81,7 +79,7 @@ export default defineComponent({
             const target = value.target as HTMLInputElement
             const diff: Record<string, unknown> = {}
             diff[field] = target.value
-            this.data = { ...this.data, ...diff }
+            this.$emit('update:modelValue', { ...this.data, ...diff })
         },
         cancel() {
             this.data = cloneDeep(this.modelValue)
@@ -93,7 +91,7 @@ export default defineComponent({
             }
             try {
                 const res = await this.getBookData({ isbn })
-                this.data = { ...this.data, ...res.data.getBookData }
+                this.$emit('update:modelValue', { ...this.data, ...res.data.getBookData })
             } catch (e) {
                 console.error(e)
                 this.error = 'Could not find ISBN'
@@ -111,12 +109,13 @@ export default defineComponent({
         <div class="flex content-center justify-between items-center space-x-4">
             <div class="flex flex-col items-stretch text-left py-1 capitalize flex-grow">
                 <label id="isbn">ISBN</label>
+
                 <input
                     :value="data['isbn']"
                     type="number"
                     for="isbn"
                     :readonly="readonly"
-                    @input="set(field.name, $event)"
+                    @input="set('isbn', $event)"
                     @blur="onISBNChange($event.target.value)"
                 />
             </div>
@@ -131,32 +130,7 @@ export default defineComponent({
         </div>
 
         <p v-if="!readonly && isbnDuplicate" class="mt- text-red-500">ISBN has already been added to library</p>
-        <div v-for="(field, key) in fields" :key="key" class="flex flex-col items-stretch text-left py-1 capitalize">
-            <template v-if="field.type.name === 'bytea'">
-                <label :id="field.name">{{ humanize(field.name) }}</label>
-                <input type="file" :for="field.name" :readonly="readonly" />
-            </template>
-            <template v-else-if="field.type.ofType && field.type.ofType.name === 'Int'">
-                <label :id="field.name">{{ humanize(field.name) }}</label>
-                <input
-                    :value="data[field.name]"
-                    type="number"
-                    :for="field.name"
-                    :readonly="readonly"
-                    @input="set(field.name, $event)"
-                />
-            </template>
-            <template v-else>
-                <label :id="field.name">{{ humanize(field.name) }}</label>
-                <input
-                    :value="data[field.name]"
-                    type="text"
-                    :for="field.name"
-                    :readonly="readonly"
-                    @input="set(field.name, $event)"
-                />
-            </template>
-        </div>
+        <generated-form :value="data" :readonly="readonly" @input="$emit('update:modelValue', $event)"></generated-form>
     </template>
 </template>
 <style lang="postcss" scoped>
