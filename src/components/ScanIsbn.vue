@@ -4,12 +4,18 @@ import { chain } from "lodash";
 import Quagga from "quagga";
 
 import { defineComponent } from "vue";
+import { error } from "./Toast.vue";
 
 let detectedHandler: any;
 
 export default defineComponent({
   name: "ScanIsbn",
   emits: ["cancel", "isbn"],
+  setup() {
+    return {
+      error,
+    };
+  },
   created() {
     setTimeout(() => {
       Quagga.init(
@@ -26,6 +32,8 @@ export default defineComponent({
         (err: Error) => {
           if (err) {
             console.log(err);
+            console.log("stuff");
+            this.error = "Failed to initialize camera";
             return;
           }
           console.log("Initialization finished. Ready to start");

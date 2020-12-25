@@ -64,6 +64,9 @@ export default defineComponent({
       }
       return find(this.result.books, (book) => book.isbn === this.data.isbn);
     },
+    hasScanningCapability(): boolean {
+      return !!window.MediaDevices;
+    },
   },
   watch: {
     isbnDuplicate() {
@@ -112,7 +115,7 @@ export default defineComponent({
       </div>
 
       <ion-icon
-        v-if="!readonly"
+        v-if="!readonly && hasScanningCapability"
         name="camera"
         size="large"
         class="mr-2"

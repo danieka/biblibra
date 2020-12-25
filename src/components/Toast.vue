@@ -20,7 +20,7 @@ export default defineComponent({
 <template>
   <div
     v-if="error.length > 0"
-    class="fixed bottom-4 flex justify-center align-center container"
+    class="fixed bottom-4 flex justify-center align-center container z-20"
   >
     <div class="bg-red-600 py-4 px-6 text-white font-bold rounded-xl">
       {{ error }}
