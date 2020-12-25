@@ -1,8 +1,14 @@
 <script lang="ts">
-import { useQuery } from '@vue/apollo-composable'
+import { useQuery, useResult } from '@vue/apollo-composable'
 import AppBar from '../components/AppBar.vue'
 import { defineComponent } from 'vue'
 import { allBooks } from '../graphql/books'
+import { identity, some } from 'lodash'
+
+interface Book {
+    title: string
+    isbn: string
+}
 
 export default defineComponent({
     components: { AppBar },
@@ -10,22 +16,37 @@ export default defineComponent({
     setup() {
         const { result } = useQuery(allBooks)
 
+        const books = useResult<any, Book[], Book[]>(result, [], data => data.books)
+
         return {
-            result,
+            books,
         }
+    },
+    data: () => ({
+        search: '',
+    }),
+    computed: {
+        filteredBooks(): ReadonlyArray<Book> {
+            if (this.search.length === 0) {
+                return this.books
+            }
+            const fieldsToSearch: (keyof Book)[] = ['isbn', 'title']
+            return this.books.filter(book =>
+                some(
+                    fieldsToSearch.map(field => book[field].toLowerCase().includes(this.search.toLowerCase())),
+                    identity,
+                ),
+            )
+        },
     },
 })
 </script>
 <template>
     <app-bar>Home</app-bar>
+    <input v-model="search" placeholder="Search" class="w-full p-2 h-8" />
     <div class="p-2">
-        <div v-if="result">
-            <router-link
-                v-for="book in result.books"
-                :key="book.id"
-                :to="`/books/${book.id}`"
-                class="block bg-white p-2 border-gray-300 border border-b-0 last:border-b first:rounded-t last:rounded-b"
-            >
+        <div class="border border-gray-300 bg-white rounded divide-y">
+            <router-link v-for="book in filteredBooks" :key="book.id" :to="`/books/${book.id}`" class="block p-2">
                 {{ book.title }}
             </router-link>
         </div>
