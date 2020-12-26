@@ -1,22 +1,21 @@
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance } from 'vue'
+import { defineComponent } from 'vue'
 import { find } from 'lodash'
-import { useMutation, useQuery } from '@vue/apollo-composable'
-import { allBookISBN, getBookDataMutation } from '../graphql/books'
-import schema from '../../schema.json'
+import { useMutation, useQuery, useResult } from '@vue/apollo-composable'
+import { allBooks, getBookDataMutation } from '../graphql/books'
 import { assert, findModel } from '../graphql/utils'
 import { error } from '../components/Toast.vue'
 import ScanIsbn from './ScanIsbn.vue'
 import { cloneDeep } from '@apollo/client/utilities'
 import Loader from './Loader.vue'
 import { form } from './Form'
+import { Book } from 'src/views/Home.vue'
 
 const fields = findModel('books').fields.filter(f => !['id', 'isbn', 'cover_image'].includes(f.name))
 
 export default defineComponent({
-    components: { ScanIsbn, Loader, GeneratedForm: form(fields) },
     name: 'BookForm',
-    emits: ['update:modelValue', 'update:valid'],
+    components: { ScanIsbn, Loader, GeneratedForm: form(fields) },
     props: {
         modelValue: {
             type: Object,
@@ -31,15 +30,16 @@ export default defineComponent({
             default: () => false,
         },
     },
-    setup(props) {
-        const internalInstance = getCurrentInstance()
+    emits: ['update:modelValue', 'update:valid'],
+    setup() {
+        const { result } = useQuery(allBooks)
+        const books = useResult<any, Book[], Book[]>(result, [], data => data.books)
 
-        const { result } = useQuery(allBookISBN)
         const humanize = (s: string) => s.replace('_', ' ')
         const { mutate: getBookData, loading } = useMutation(getBookDataMutation)
 
         return {
-            result,
+            books,
             fields,
             humanize,
             error,
@@ -53,10 +53,10 @@ export default defineComponent({
     }),
     computed: {
         isbnDuplicate(): boolean {
-            if (!this.result || !this.data || this.data.isbn === this.modelValue.isbn) {
+            if (!this.data || this.data.isbn === this.modelValue.isbn) {
                 return false
             }
-            return find(this.result.books, book => book.isbn === this.data.isbn)
+            return !!find(this.books, book => book.isbn === this.data.isbn)
         },
         hasScanningCapability(): boolean {
             return !!window.MediaDevices

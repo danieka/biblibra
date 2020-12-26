@@ -1,22 +1,22 @@
 <script lang="ts">
-import { useMutation, useQuery } from '@vue/apollo-composable'
-import { defineComponent, watch } from 'vue'
-import { addBookMutation, allBookISBN, allBooks, getBookDataMutation } from '../graphql/books'
-import { countBy, identity, chain, pickBy, find } from 'lodash'
+import { useMutation } from '@vue/apollo-composable'
+import { defineComponent } from 'vue'
+import { addBookMutation, allBooks } from '../graphql/books'
+import { pickBy } from 'lodash'
 
-import schema from '../../schema.json'
-import { findModel } from '../graphql/utils'
+import { assert, findModel } from '../graphql/utils'
 import BookForm from '../components/BookForm.vue'
 import AppBar from '../components/AppBar.vue'
 
 const fields = findModel('books').fields.filter(f => !['id', 'isbn'].includes(f.name))
 
 export default defineComponent({
-    components: { BookForm, AppBar },
     name: 'CreateBook',
+    components: { BookForm, AppBar },
     setup() {
         const { mutate: addBook } = useMutation(addBookMutation, () => ({
             update: (cache, { data: { insert_books_one } }) => {
+                assert(insert_books_one.id)
                 const data = cache.readQuery<Record<string, unknown[]>>({
                     query: allBooks,
                 }) || { books: [] }

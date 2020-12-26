@@ -12,7 +12,7 @@ export const allBooks = gql`
 `
 
 export const bookByPk = gql`
-    query bookByPx($id: bigint!) {
+    query bookByPk($id: bigint!) {
         books_by_pk(id: $id) {
             classification
             cover_image
@@ -22,14 +22,6 @@ export const bookByPk = gql`
             pages
             title
             year
-        }
-    }
-`
-
-export const allBookISBN = gql`
-    query AllBooks {
-        books {
-            isbn
         }
     }
 `
@@ -54,6 +46,21 @@ export const getBookDataMutation = gql`
             pages
             title
             year
+        }
+    }
+`
+
+export const updateBookByPkMutation = gql`
+    mutation updateBookByPk($id: bigint!, $object: books_set_input) {
+        update_books_by_pk(pk_columns: { id: $id }, _set: $object) {
+            year
+            title
+            pages
+            language
+            isbn
+            id
+            cover_image
+            classification
         }
     }
 `

@@ -5,14 +5,15 @@ import { defineComponent } from 'vue'
 import { allBooks } from '../graphql/books'
 import { identity, some } from 'lodash'
 
-interface Book {
+export interface Book {
     title: string
     isbn: string
+    id: number
 }
 
 export default defineComponent({
-    components: { AppBar },
     name: 'Home',
+    components: { AppBar },
     setup() {
         const { result } = useQuery(allBooks)
 
@@ -33,7 +34,9 @@ export default defineComponent({
             const fieldsToSearch: (keyof Book)[] = ['isbn', 'title']
             return this.books.filter(book =>
                 some(
-                    fieldsToSearch.map(field => book[field].toLowerCase().includes(this.search.toLowerCase())),
+                    fieldsToSearch.map(field =>
+                        book[field].toString().toLowerCase().includes(this.search.toLowerCase()),
+                    ),
                     identity,
                 ),
             )

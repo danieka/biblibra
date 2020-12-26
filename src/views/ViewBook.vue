@@ -1,10 +1,13 @@
 <script lang="ts">
 import { useMutation, useQuery, useResult } from '@vue/apollo-composable'
-import { bookByPk } from '../graphql/books'
+import { allBooks, bookByPk, updateBookByPkMutation } from '../graphql/books'
 import { defineComponent, Ref, ref } from 'vue'
 import BookForm from '../components/BookForm.vue'
 import AppBar from '../components/AppBar.vue'
-import { assert } from '../graphql/utils'
+import { assert, findModel } from '../graphql/utils'
+import { Book } from './Home.vue'
+import { pickBy, uniqBy } from 'lodash'
+
 export default defineComponent({
     components: { BookForm, AppBar },
     props: {
@@ -13,18 +16,31 @@ export default defineComponent({
             required: true,
         },
     },
-    setup({ id }) {
+    setup(props) {
         const { result } = useQuery(bookByPk, () => ({
-            id,
+            id: props.id,
         }))
+        const book = useResult<any, null, Book>(result, null, data => data.books_by_pk)
 
         const form: Ref<null | typeof BookForm> = ref(null)
 
-        const book = useResult(result, null, data => data.books_by_pk)
+        const { mutate: updateBookByPk } = useMutation(updateBookByPkMutation, () => ({
+            update: (cache, { data: { update_books_by_pk } }) => {
+                assert(update_books_by_pk.id)
+                const data = cache.readQuery<{ books: Book[] }>({
+                    query: allBooks,
+                }) || { books: [] }
+                cache.writeQuery({
+                    query: allBooks,
+                    data: { books: uniqBy([...data.books, update_books_by_pk], b => b.id) },
+                })
+            },
+        }))
 
         return {
             book,
             form,
+            updateBookByPk,
         }
     },
     data: () => ({
@@ -38,7 +54,14 @@ export default defineComponent({
             assert(!!this.form)
             this.form.cancel()
         },
-        save() {},
+        async save() {
+            assert(!!this.book)
+            this.updateBookByPk({
+                id: this.book.id,
+                object: pickBy(this.formData, (value, key) => findModel('books').fields.find(f => f.name === key)),
+            })
+            this.edit = false
+        },
     },
 })
 </script>
@@ -53,8 +76,8 @@ export default defineComponent({
         <book-form
             v-if="book"
             ref="form"
-            :model-value="book"
             v-model:valid="valid"
+            :model-value="book"
             :readonly="!edit"
             @update:model-value="formData = $event"
         ></book-form>
