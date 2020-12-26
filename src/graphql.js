@@ -37,6 +37,7 @@ export const apolloClient = new ApolloClient({
         if (graphQLErrors) {
             for (let err of graphQLErrors) {
                 if (err.name === 'AuthenticationError') {
+                    console.error(err)
                 }
                 console.dir('graphQLErrors', err)
             }

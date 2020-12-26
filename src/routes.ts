@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Home from './views/Home.vue'
 import CreateBook from './views/CreateBook.vue'
 import ViewBook from './views/ViewBook.vue'
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 
-export let routes: RouteRecordRaw[] = [
+export const routes: RouteRecordRaw[] = [
     { path: '/', component: Home },
     {
         path: '/books/create',
@@ -26,14 +27,14 @@ export const router = createRouter({
 if (hot) {
     let removeRoutes: any[] = []
 
-    for (let route of routes) {
+    for (const route of routes) {
         removeRoutes.push(router.addRoute(route))
     }
 
     hot.acceptDeps('./routes.ts', ({ routes }: { routes: any }) => {
-        for (let removeRoute of removeRoutes) removeRoute()
+        for (const removeRoute of removeRoutes) removeRoute()
         removeRoutes = []
-        for (let route of routes) {
+        for (const route of routes) {
             removeRoutes.push(router.addRoute(route))
         }
         router.replace('')

@@ -5,7 +5,8 @@
     "dev": "vite",
     "build": "vite build",
     "schema": "apollo schema:download --endpoint http://localhost:8080/v1/graphql",
-    "postinstall": "node scripts/patch-apollo.js"
+    "postinstall": "node scripts/patch-apollo.js",
+    "lint": "eslint src"
   },
   "dependencies": {
     "@apollo/client": "^3.3.6",
@@ -26,9 +27,15 @@
   "devDependencies": {
     "@tailwindcss/postcss7-compat": "^2.0.2",
     "@types/lodash": "^4.14.165",
+    "@typescript-eslint/eslint-plugin": "^4.11.0",
+    "@typescript-eslint/parser": "^4.11.0",
     "@vue/babel-plugin-jsx": "^1.0.0",
     "@vue/compiler-sfc": "^3.0.4",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "@vue/eslint-config-typescript": "^7.0.0",
     "autoprefixer": "^9.8.6",
+    "eslint": "^7.0.0",
+    "eslint-plugin-vue": "^7.0.0",
     "postcss": "^7.0.35",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.2",
     "vite": "^1.0.0-rc.13"
